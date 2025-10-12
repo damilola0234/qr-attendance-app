@@ -1,0 +1,45 @@
+package com.example.qrattendance.controller;
+
+import com.example.qrattendance.model.Attendance;
+import com.example.qrattendance.model.Staff;
+import com.example.qrattendance.repository.AttendanceRepository;
+import com.example.qrattendance.repository.StaffRepository;
+import com.example.qrattendance.service.QRService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api")
+public class AttendanceController {
+    @Autowired
+    private StaffRepository staffRepo;
+    @Autowired private AttendanceRepository attendanceRepo;
+    @Autowired private QRService qrService;
+
+    @PostMapping("/staff")
+    public Staff registerStaff(@RequestBody Staff staff) throws Exception {
+        String qr = qrService.generateQRCode(String.valueOf(staff.getId()));
+        staff.setQrCode(qr);
+        return staffRepo.save(staff);
+    }
+
+    @PostMapping("/attendance")
+    public Attendance logAttendance(@RequestBody Map<String, String> payload) {
+        Long personId = Long.parseLong(payload.get("personId"));
+        String type = payload.get("type");
+        Attendance att = new Attendance();
+        att.setPersonId(personId);
+        att.setType(type);
+        att.setTimestamp(LocalDateTime.now());
+        return attendanceRepo.save(att);
+    }
+
+    @GetMapping("/attendance")
+    public List<Attendance> getAttendance() {
+        return attendanceRepo.findAll();
+    }
+}
