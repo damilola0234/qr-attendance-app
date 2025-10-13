@@ -6,6 +6,7 @@ import com.example.qrattendance.repository.AttendanceRepository;
 import com.example.qrattendance.repository.StaffRepository;
 import com.example.qrattendance.service.QRService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -36,6 +37,17 @@ public class AttendanceController {
         att.setType(type);
         att.setTimestamp(LocalDateTime.now());
         return attendanceRepo.save(att);
+    }
+
+
+
+    @Controller
+    public static class LandingController {
+
+        @GetMapping("/")
+        public String welcome() {
+            return "forward:/welcome.html";
+        }
     }
 
     @GetMapping("/attendance")
