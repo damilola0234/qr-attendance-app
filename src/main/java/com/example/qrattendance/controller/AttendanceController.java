@@ -24,8 +24,9 @@ public class AttendanceController {
     @PostMapping("/staff")
     public Staff registerStaff(@RequestBody Staff staff) throws Exception {
         String qr = qrService.generateQRCode(String.valueOf(staff.getId()));
-        staff.setQrCode(qr);
-        return staffRepo.save(staff);
+        Staff savedstaff = staffRepo.save(staff);
+        savedstaff.setQrCode(qr);
+        return staffRepo.save(savedstaff);
     }
 
     @PostMapping("/attendance")
