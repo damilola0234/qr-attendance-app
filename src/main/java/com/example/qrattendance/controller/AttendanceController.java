@@ -18,6 +18,19 @@ import java.util.Map;
 public class AttendanceController {
     @Autowired
     private StaffRepository staffRepo;
+
+    // view all staff
+    @GetMapping("/staff")
+    public List<Staff> getAllStaff() {
+        return staffRepo.findAll();
+    }
+
+    //  Delete a staff by ID
+    @DeleteMapping("/staff/{id}")
+    public void deleteStaff(@PathVariable Long id) {
+        staffRepo.deleteById(id);
+    }
+
     @Autowired private AttendanceRepository attendanceRepo;
     @Autowired private QRService qrService;
 
@@ -27,6 +40,7 @@ public class AttendanceController {
         Staff savedstaff = staffRepo.save(staff);
         savedstaff.setQrCode(qr);
         return staffRepo.save(savedstaff);
+
     }
 
     @PostMapping("/attendance")
