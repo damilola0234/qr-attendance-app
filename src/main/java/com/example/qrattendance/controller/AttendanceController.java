@@ -47,7 +47,7 @@ public class AttendanceController {
 
         @GetMapping("/")
         public String welcome() {
-            return "forward:/welcome.html";
+            return "forward:/index.html";
         }
     }
 
