@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: qr-attendance-app
+    env: java
+    plan: free
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -Dserver.port=$PORT -Xmx512m -jar target/*.jar
+    envVars:
+      - key: DB_HOST
+        value: ep-autumn-sunset-ab0xuy8i-pooler.eu-west-2.aws.neon.tech
+      - key: DB_PORT
+        value: 5432
+      - key: DB_NAME
+        value: neondb
+      - key: DB_USER
+        value: neondb_owner
+      - key: DB_PASSWORD
+        value: npg_4VjpOSyBJx8K
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+        value: org.hibernate.dialect.PostgreSQLDialect
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: SERVER_PORT
+        value: 10000
+    healthCheckPath: /actuator/health
+    autoDeploy: true
