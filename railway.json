@@ -3,11 +3,11 @@
   "build": {
     "builder": "NIXPACKS",
     "buildCommand": "chmod +x mvnw && ./mvnw clean package -DskipTests",
-    "startCommand": "java -jar target/qrattendance-0.0.1-SNAPSHOT.jar",
-    "run": "java -jar target/qrattendance-0.0.1-SNAPSHOT.jar"
+    "startCommand": "sh -c 'JAR_FILE=$(find target -name \"*.jar\" -type f -exec ls -1t {} + | head -n 1) && java -jar $JAR_FILE'",
+    "run": "sh -c 'JAR_FILE=$(find target -name \"*.jar\" -type f -exec ls -1t {} + | head -n 1) && java -jar $JAR_FILE'"
   },
   "deploy": {
-    "startCommand": "java -Xmx512m -Xms256m -jar target/qrattendance-0.0.1-SNAPSHOT.jar",
+    "startCommand": "sh -c 'JAR_FILE=$(find target -name \"*.jar\" -type f -exec ls -1t {} + | head -n 1) && java -Xmx512m -Xms256m -jar $JAR_FILE'",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   },
