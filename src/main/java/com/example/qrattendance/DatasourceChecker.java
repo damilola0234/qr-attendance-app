@@ -1,16 +1,13 @@
 package com.example.qrattendance;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import java.net.InetAddress;
-import java.net.Socket;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.Objects;
-
+/**
+ * Simple configuration logger that shows database connection details on startup.
+ * Provides H2 console access information when running with H2 in-memory database.
+ */
 @Component
 public class DatasourceChecker implements CommandLineRunner {
 
@@ -22,62 +19,21 @@ public class DatasourceChecker implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Load environment variables from .env file
-        Dotenv dotenv = Dotenv.load();
-
-        // Get database URL from environment variables
-        String dbUrl = dotenv.get("DATABASE_URL");
-        String url = dbUrl != null ? dbUrl : env.getProperty("spring.datasource.url");
-
-        // Get other database properties
-        String host = dotenv.get("DB_HOST", env.getProperty("DB_HOST"));
-        String portStr = dotenv.get("DB_PORT", env.getProperty("DB_PORT", "5432"));
-        String user = dotenv.get("DB_USER", env.getProperty("DB_USER"));
-        String pass = dotenv.get("DB_PASSWORD", env.getProperty("DB_PASSWORD"));
-
-        System.out.println("Resolved spring.datasource.url=" + url);
-        System.out.println("Resolved DB_HOST=" + host);
-        System.out.println("Resolved DB_PORT=" + portStr);
-        System.out.println("Resolved DB_NAME=" + env.getProperty("DB_NAME"));
-        System.out.println("Resolved DB_USER=" + user);
-        System.out.println("Resolved DB_PASSWORD=" + (pass == null ? "null" : "****"));
-
-        if (host == null || host.isBlank()) {
-            System.out.println("DB_HOST is not set");
-            return;
-        }
-
-        // DNS resolution check
-        try {
-            InetAddress addr = InetAddress.getByName(host);
-            System.out.println("DNS: " + host + " -> " + addr.getHostAddress());
-        } catch (Exception e) {
-            System.out.println("DNS resolution failed for host: " + host + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
-            return;
-        }
-
-        // TCP connectivity check
-        int port = Integer.parseInt(portStr);
-        try (Socket s = new Socket()) {
-            s.connect(new java.net.InetSocketAddress(host, port), 2000);
-            System.out.println("TCP: Connected to " + host + ":" + port);
-        } catch (Exception e) {
-            System.out.println("TCP connection failed to " + host + ":" + port + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
-            return;
-        }
-
-        // Quick JDBC connect (short timeout)
-        if (url != null && user != null) {
-            try {
-                DriverManager.setLoginTimeout(5); // seconds
-                try (Connection c = DriverManager.getConnection(url, Objects.toString(user, ""), Objects.toString(pass, ""))) {
-                    System.out.println("JDBC: Connection successful (autocommit=" + c.getAutoCommit() + ")");
-                }
-            } catch (Exception e) {
-                System.out.println("JDBC connection failed -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
-            }
-        } else {
-            System.out.println("Skipping JDBC attempt: missing url or user");
+        String url = env.getProperty("spring.datasource.url", "");
+        String username = env.getProperty("spring.datasource.username", "");
+        
+        System.out.println("\n=== Database Configuration ===");
+        System.out.println("JDBC URL: " + url);
+        System.out.println("Username: " + username);
+        
+        if (url.contains("h2:mem")) {
+            System.out.println("\n=== H2 Database Information ===");
+            System.out.println("Using H2 in-memory database");
+            System.out.println("H2 Console: http://localhost:8080/h2-console");
+            System.out.println("JDBC URL: jdbc:h2:mem:qrattendance");
+            System.out.println("Username: sa");
+            System.out.println("Password: password");
+            System.out.println("================================\n");
         }
     }
 }
