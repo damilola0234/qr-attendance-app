@@ -1,0 +1,48 @@
+# fly.toml file for your Java application
+# For more configuration options, see: https://fly.io/docs/reference/configuration/
+
+app = "qr-attendance-app"
+primary_region = "lhr"  # London region, change as needed
+
+[build]
+  builder = "paketobuildpacks/builder:tiny"
+  buildpacks = ["gcr.io/paketo-buildpacks/java"]
+
+[build.args]
+  BP_JVM_VERSION = "17"
+  BP_MAVEN_BUILT_ARTIFACT = "target/*.jar"
+  BP_MAVEN_BUILD_ARGUMENTS = "-Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dmaven.source.skip=true -Dmaven.site.skip=true -Dmaven.antrun.skip=true package"
+
+[env]
+  SPRING_PROFILES_ACTIVE = "production"
+  SPRING_DATASOURCE_URL = "jdbc:postgresql://ep-autumn-sunset-ab0xuy8i-pooler.eu-west-2.aws.neon.tech:5432/neondb?sslmode=require"
+  SPRING_DATASOURCE_USERNAME = "neondb_owner"
+  SPRING_DATASOURCE_PASSWORD = "npg_4VjpOSyBJx8K"
+  SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT = "org.hibernate.dialect.PostgreSQLDialect"
+  SPRING_JPA_HIBERNATE_DDL_AUTO = "update"
+  SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA = "public"
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME = "org.postgresql.Driver"
+  PORT = "8080"
+  JAVA_OPTS = "-Xmx512m -Xms256m"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    method = "GET"
+    path = "/actuator/health"
+    protocol = "http"
+    tls_skip_verify = false
+    grace_period = "5s"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 1024

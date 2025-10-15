@@ -1,5 +1,6 @@
 package com.example.qrattendance;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -21,11 +22,18 @@ public class DatasourceChecker implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        String url = env.getProperty("spring.datasource.url");
-        String host = env.getProperty("DB_HOST");
-        String portStr = env.getProperty("DB_PORT", "5432");
-        String user = env.getProperty("DB_USER");
-        String pass = env.getProperty("DB_PASSWORD");
+        // Load environment variables from .env file
+        Dotenv dotenv = Dotenv.load();
+
+        // Get database URL from environment variables
+        String dbUrl = dotenv.get("DATABASE_URL");
+        String url = dbUrl != null ? dbUrl : env.getProperty("spring.datasource.url");
+
+        // Get other database properties
+        String host = dotenv.get("DB_HOST", env.getProperty("DB_HOST"));
+        String portStr = dotenv.get("DB_PORT", env.getProperty("DB_PORT", "5432"));
+        String user = dotenv.get("DB_USER", env.getProperty("DB_USER"));
+        String pass = dotenv.get("DB_PASSWORD", env.getProperty("DB_PASSWORD"));
 
         System.out.println("Resolved spring.datasource.url=" + url);
         System.out.println("Resolved DB_HOST=" + host);
